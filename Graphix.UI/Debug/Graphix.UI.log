@@ -1,4 +1,2 @@
-﻿  D3DRenderer.cpp
-C:\Users\wlinton\Source\Repos\Graphix\Graphix.UI\D3DRenderer.cpp(51,21): warning C4838: conversion from 'int' to 'FLOAT' requires a narrowing conversion
-C:\Users\wlinton\Source\Repos\Graphix\Graphix.UI\D3DRenderer.cpp(51,21): warning C4244: 'initializing': conversion from 'int' to 'FLOAT', possible loss of data
+﻿  Triangle.cpp
   Graphix.UI.vcxproj -> C:\Users\wlinton\Source\Repos\Graphix\Debug\Graphix.UI.exe

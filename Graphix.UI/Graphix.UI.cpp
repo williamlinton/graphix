@@ -1,9 +1,12 @@
 // Graphix.UI.cpp : Defines the entry point for the application.
 //
 
+#include <string>
 #include "framework.h"
 #include "Graphix.UI.h"
 #include "D3DRenderer.h"
+#include "GameTimer.h"
+#include "FileReader.h"
 
 #define MAX_LOADSTRING 100
 
@@ -30,6 +33,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    FileReader fr;
+    fr.ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\Debug\\PixelShader.cso");
+
     // TODO: Place code here.
     _width = 800;
     _height = 600;
@@ -51,6 +57,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
     g_d3d->Init(_handle, _width, _height);
 
+    double dt = 0;
+    int index = 0;
+    int frames = 0;
+    double metricTime = 0;
+
+    GameTimer timer;
+    timer.Start();
+
     while (true)
     {
         if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -58,7 +72,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+        dt = timer.GetElapsedMilliseconds();
         g_d3d->Render();
+        // update metrics
+        ++frames;
+        ++index;
+        metricTime += dt;
+
+        if (metricTime > 1000)
+        {
+            std::wstring metric = L"Delta: ";
+            metric += std::to_wstring(dt);
+            metric += L"    Frames: ";
+            metric += std::to_wstring(frames);
+            metric += L"    Index: ";
+            metric += std::to_wstring(index);
+            SetWindowText(_handle, metric.c_str());
+            metricTime = 0;
+        }
     }
 
     //// Main message loop:

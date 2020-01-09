@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include <DirectXMath.h>
+#include "Triangle.h"
 
 class D3DRenderer
 {
@@ -17,5 +18,7 @@ private:
 	ID3D11Device* _device;
 	ID3D11DeviceContext* _deviceContext;
 	ID3D11RenderTargetView* _rtv;
+	Triangle* _triangle;
+	ID3D11DepthStencilView* _dsv;
 };
 

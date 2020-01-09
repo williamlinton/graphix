@@ -40,6 +40,45 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 	//D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 
 	HRESULT rtvResult = _device->CreateRenderTargetView(backBuffer, 0, &_rtv);
+	_deviceContext->OMSetRenderTargets(1, &_rtv, 0);
+	D3D11_VIEWPORT viewport;
+	viewport.Height = _height;
+	viewport.MaxDepth = 1.0;
+	viewport.MinDepth = 0;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = _width;
+	
+	_deviceContext->RSSetViewports(1, &viewport);
+
+	//--create depth stencil view
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	ZeroMemory(&dsvDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+	dsvDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION::D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+
+	ID3D11Texture2D* depthBuffer;
+	D3D11_TEXTURE2D_DESC texDesc;
+	ZeroMemory(&texDesc, sizeof(texDesc));
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+	//texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_READ;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D24_UNORM_S8_UINT;
+	texDesc.Height = height;
+	texDesc.MipLevels = 1;
+	texDesc.MiscFlags = 0;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
+	texDesc.Width = width;
+	auto depthBufferResult = _device->CreateTexture2D(&texDesc, 0, &depthBuffer);
+
+	auto dsvResult = _device->CreateDepthStencilView(depthBuffer, &dsvDesc, &_dsv);
+
+	_triangle = new Triangle();
+	_triangle->Init(_device);
 	int stop = 0;
 
 }
@@ -48,7 +87,9 @@ void D3DRenderer::Render()
 {
 	static int red = 0;
 	red = rand() % 255;
-	FLOAT color[4] = { red, 0, 0, 255 };
+	FLOAT color[4] = { 0, 0, 0, 255 };
+	_deviceContext->ClearDepthStencilView(_dsv, D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0, 0);
 	_deviceContext->ClearRenderTargetView(_rtv, color);
+	_triangle->Render(_deviceContext);
 	_swapChain->Present(0, 0);
 }
