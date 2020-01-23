@@ -15,21 +15,22 @@ void Square::Init(ID3D11Device* device)
 	HRESULT result2 = device->CreateVertexShader(&vsBytes[0], vsBytes.size(), 0, &_vertexShader);
 
 	float d = 1.0;
+	float z = 0.5;
 
 	Vertex v1;
-	v1.Position = DirectX::XMFLOAT4(-d, d, 0, 1);
+	v1.Position = DirectX::XMFLOAT4(-d, d, z, 1);
 	v1.Color = DirectX::XMFLOAT4(1, 0, 0, 1);
 
 	Vertex v2;
-	v2.Position = DirectX::XMFLOAT4(d, d, 0, 1);
+	v2.Position = DirectX::XMFLOAT4(d, d, z, 1);
 	v2.Color = DirectX::XMFLOAT4(0, 1, 0, 1);
 
 	Vertex v3;
-	v3.Position = DirectX::XMFLOAT4(d, -d, 0, 1);
+	v3.Position = DirectX::XMFLOAT4(d, -d, z, 1);
 	v3.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
 	Vertex v4;
-	v4.Position = DirectX::XMFLOAT4(-d, -d, 0, 1);
+	v4.Position = DirectX::XMFLOAT4(-d, -d, z, 1);
 	v4.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
 	_vertx.push_back(v1);
@@ -109,7 +110,7 @@ void Square::Init(ID3D11Device* device)
 	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
 	rastDesc.DepthBias = 0;
 	rastDesc.DepthBiasClamp = 1.0;
-	rastDesc.DepthClipEnable = false;
+	rastDesc.DepthClipEnable = true;
 	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 	rastDesc.FrontCounterClockwise = false;
 	rastDesc.MultisampleEnable = false;
@@ -125,7 +126,10 @@ void Square::Init(ID3D11Device* device)
 	DirectX::XMStoreFloat4x4(&_worldToCamera, worldToCamera);
 
 	auto cameraToProjection = DirectX::XMMatrixIdentity();
-	DirectX::XMStoreFloat4x4(&_cameraToProjection, cameraToProjection);
+	//DirectX::XMStoreFloat4x4(&_cameraToProjection, cameraToProjection);
+	auto projMatrix = DirectX::XMMatrixPerspectiveFovLH(radians(45), 800.0 / 600.0, 1, 5);
+	DirectX::XMStoreFloat4x4(&_cameraToProjection, projMatrix);
+	
 
 	int stop = 9000;
 

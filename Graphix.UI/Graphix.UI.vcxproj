@@ -155,17 +155,20 @@
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="GraphicsUtil.h" />
     <ClInclude Include="Graphix.UI.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DRenderer.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="GraphicsUtil.cpp" />
     <ClCompile Include="Graphix.UI.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="Triangle.cpp" />
