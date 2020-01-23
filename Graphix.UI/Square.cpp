@@ -1,11 +1,10 @@
-#include "Triangle.h"
+#include "Square.h"
 
-
-Triangle::Triangle()
+Square::Square()
 {
 }
 
-void Triangle::Init(ID3D11Device* device)
+void Square::Init(ID3D11Device* device)
 {
 	_fr = new FileReader();
 	std::vector<unsigned char> psBytes;
@@ -15,32 +14,40 @@ void Triangle::Init(ID3D11Device* device)
 	HRESULT result = device->CreatePixelShader(&psBytes[0], psBytes.size(), 0, &_pixelShader);
 	HRESULT result2 = device->CreateVertexShader(&vsBytes[0], vsBytes.size(), 0, &_vertexShader);
 
-	std::vector<Vertex> vertx;
-	std::vector<unsigned int> indx;
+	float d = 1.0;
 
 	Vertex v1;
-	v1.Position = DirectX::XMFLOAT4(-1, -1, 0, 1);
+	v1.Position = DirectX::XMFLOAT4(-d, d, 0, 1);
 	v1.Color = DirectX::XMFLOAT4(1, 0, 0, 1);
 
 	Vertex v2;
-	v2.Position = DirectX::XMFLOAT4(0, 1, 0, 1);
+	v2.Position = DirectX::XMFLOAT4(d, d, 0, 1);
 	v2.Color = DirectX::XMFLOAT4(0, 1, 0, 1);
 
 	Vertex v3;
-	v3.Position = DirectX::XMFLOAT4(1, -1, 0, 1);
+	v3.Position = DirectX::XMFLOAT4(d, -d, 0, 1);
 	v3.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
-	vertx.push_back(v1);
-	vertx.push_back(v2);
-	vertx.push_back(v3);
+	Vertex v4;
+	v4.Position = DirectX::XMFLOAT4(-d, -d, 0, 1);
+	v4.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
-	indx.push_back(0);
-	indx.push_back(1);
-	indx.push_back(2);
+	_vertx.push_back(v1);
+	_vertx.push_back(v2);
+	_vertx.push_back(v3);
+	_vertx.push_back(v4);
+
+	_indx.push_back(0);
+	_indx.push_back(2);
+	_indx.push_back(3);
+
+	_indx.push_back(0);
+	_indx.push_back(1);
+	_indx.push_back(2);
 
 	D3D11_BUFFER_DESC descVertex;
 	descVertex.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
-	descVertex.ByteWidth = sizeof(Vertex) * vertx.size();
+	descVertex.ByteWidth = sizeof(Vertex) * _vertx.size();
 	descVertex.CPUAccessFlags = 0;
 	descVertex.MiscFlags = 0;
 	descVertex.StructureByteStride = 0;
@@ -48,23 +55,35 @@ void Triangle::Init(ID3D11Device* device)
 
 	D3D11_BUFFER_DESC descIndex;
 	descIndex.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
-	descIndex.ByteWidth = sizeof(unsigned int) * indx.size();
+	descIndex.ByteWidth = sizeof(unsigned int) * _indx.size();
 	descIndex.CPUAccessFlags = 0;
 	descIndex.MiscFlags = 0;
 	descIndex.StructureByteStride = 0;
 	descIndex.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
+
+	D3D11_BUFFER_DESC descConstant;
+	descConstant.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+	descConstant.ByteWidth = sizeof(CBPerEntity);
+	descConstant.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
+	descConstant.MiscFlags = 0;
+	descConstant.StructureByteStride = 0;
+	descConstant.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+
 	
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
-	vertexData.pSysMem = &vertx[0];
+	vertexData.pSysMem = &_vertx[0];
 	result = device->CreateBuffer(&descVertex, &vertexData, &_vertexBuffer);
 
 	D3D11_SUBRESOURCE_DATA indexData;
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
-	indexData.pSysMem = &indx[0];
+	indexData.pSysMem = &_indx[0];
 	result = device->CreateBuffer(&descIndex, &indexData, &_indexBuffer);
+
+	result = device->CreateBuffer(&descConstant, 0, &_constantBuffer);
+
 
 	D3D11_INPUT_ELEMENT_DESC inputLayout[2];
 	inputLayout[0].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
@@ -99,13 +118,24 @@ void Triangle::Init(ID3D11Device* device)
 
 	auto rastResult = device->CreateRasterizerState(&rastDesc, &_rasterizerState);
 
+	auto modelToWorld = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&_modelToWorld, modelToWorld);
+
+	auto worldToCamera = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&_worldToCamera, worldToCamera);
+
+	auto cameraToProjection = DirectX::XMMatrixIdentity();
+	DirectX::XMStoreFloat4x4(&_cameraToProjection, cameraToProjection);
+
 	int stop = 9000;
+
 }
 
-void Triangle::Render(ID3D11DeviceContext* context)
+void Square::Render(ID3D11DeviceContext* context)
 {
 	context->IASetInputLayout(_inputLayout);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
 	context->PSSetShader(_pixelShader, 0, 0);
 	context->VSSetShader(_vertexShader, 0, 0);
 
@@ -114,7 +144,18 @@ void Triangle::Render(ID3D11DeviceContext* context)
 	unsigned int offset = 0;
 	context->IASetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
-	context->DrawIndexed(3, 0, 0);
+
+	D3D11_MAPPED_SUBRESOURCE subresource;
+
+	context->Map(_constantBuffer, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	CBPerEntity* cbperentity = (CBPerEntity*)subresource.pData;
+	cbperentity->ModelToWorld = _modelToWorld;
+	cbperentity->WorldToCamera = _worldToCamera;
+	cbperentity->CameraToProjection = _cameraToProjection;
+	context->Unmap(_constantBuffer, 0);
+
+	context->VSSetConstantBuffers(0, 1, &_constantBuffer);
+	context->DrawIndexed(_indx.size(), 0, 0);
 
 	//D3D11_MAPPED_SUBRESOURCE vertexData;
 	//context->Map(_vertexBuffer, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &vertexData);

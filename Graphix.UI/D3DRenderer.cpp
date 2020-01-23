@@ -2,17 +2,21 @@
 
 void D3DRenderer::Init(HWND handle, int width, int height)
 {
+	_height = height;
+	_width = width;
+
 	IDXGIFactory* _dxgiFactory;
 	HRESULT result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&_dxgiFactory);
-	IDXGIAdapter* adapter;
-	HRESULT adapterResult = _dxgiFactory->EnumAdapters(0, &adapter);
+	HRESULT adapterResult = _dxgiFactory->EnumAdapters(0, &_adapter);
 	DXGI_ADAPTER_DESC desc;
-	adapter->GetDesc(&desc);
+	_adapter->GetDesc(&desc);
 
 	unsigned int flags = 0;
 	flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
-	D3D_FEATURE_LEVEL levels = { D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0 };
+	//D3D_FEATURE_LEVEL levels = { D3D_FEATURE_LEVEL_11_0 };
+	D3D_FEATURE_LEVEL levels[1];
+	levels[0] = D3D_FEATURE_LEVEL_11_0;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -31,7 +35,7 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 	swapChainDesc.Windowed = true;
 
 	//ZeroMemory((void *)&swapChainDesc, sizeof(swapChainDesc));
-	HRESULT swapChainResult = D3D11CreateDeviceAndSwapChain(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, 0, flags, &levels, 1, D3D11_SDK_VERSION, &swapChainDesc, &_swapChain, &_device, 0, &_deviceContext);
+	HRESULT swapChainResult = D3D11CreateDeviceAndSwapChain(_adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, 0, flags, levels, 1, D3D11_SDK_VERSION, &swapChainDesc, &_swapChain, &_device, 0, &_deviceContext);
 
 	ID3D11Texture2D* backBuffer;
 
@@ -39,8 +43,9 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 
 	//D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 
-	HRESULT rtvResult = _device->CreateRenderTargetView(backBuffer, 0, &_rtv);
+	HRESULT rtvResult = _device->CreateRenderTargetView(backBuffer, nullptr, &_rtv);
 	_deviceContext->OMSetRenderTargets(1, &_rtv, 0);
+
 	D3D11_VIEWPORT viewport;
 	viewport.Height = _height;
 	viewport.MaxDepth = 1.0;
@@ -85,8 +90,8 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 	_device->CreateRasterizerState(&rastDesc, &rastState);
 	_deviceContext->RSSetState(rastState);
 
-	_triangle = new Triangle();
-	_triangle->Init(_device);
+	_square = new Square();
+	_square->Init(_device);
 	int stop = 0;
 
 }
@@ -98,6 +103,6 @@ void D3DRenderer::Render()
 	FLOAT color[4] = { 0, 0, 0, 255 };
 	_deviceContext->ClearDepthStencilView(_dsv, D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0, 0);
 	_deviceContext->ClearRenderTargetView(_rtv, color);
-	_triangle->Render(_deviceContext);
+	_square->Render(_deviceContext);
 	_swapChain->Present(0, 0);
 }
