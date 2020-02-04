@@ -67,7 +67,10 @@ void Sphere::Init(ID3D11Device* device)
 
 	top.Position = DirectX::XMFLOAT4(0, radius, 0, 1);
 	top.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
-	//_vertx.push_back(top);
+
+	bottom.Position = DirectX::XMFLOAT4(0, -radius, 0, 1);
+	bottom.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	_vertx.push_back(bottom);
 
 	for (int stack = 0; stack < stacks; stack++)
 	{
@@ -82,35 +85,59 @@ void Sphere::Init(ID3D11Device* device)
 			double y = radius * cos(theta);
 			double z = radius * sin(theta) * sin(phi);
 			point.Position = DirectX::XMFLOAT4(x, y, z, 1);
-			if (stack == 0) point.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
-			else point.Color = DirectX::XMFLOAT4(red, green, 0, 1);
+			//if (stack == 0) point.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+			//else if (stack == stacks - 1) point.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+			//else point.Color = DirectX::XMFLOAT4(red, green, 0, 1);
+			point.Color = DirectX::XMFLOAT4(red, green, 0, 1);
 			_vertx.push_back(point);
 		}
 	}
+	_vertx.push_back(top);
 
-	bottom.Position = DirectX::XMFLOAT4(0, -radius, 0, 1);
-	bottom.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
-	//_vertx.push_back(bottom);
+	for (int slice = 0; slice < slices; slice++)
+	{
+		int bottom = 0;
+		int topright = slice + 1;
+		int topleft = slice + 2;
+		if (slice == slices - 1) topleft = 1;
+		_indx.push_back(bottom);
+		_indx.push_back(topright);
+		_indx.push_back(topleft);
+	}
 
 	// Build index list
 	for (int stack = 0; stack < stacks; stack++)
 	{
 		for (int slice = 0; slice < slices; slice++)
 		{
-			int topleft = stack * slices + slice;
-			int topright = stack * slices + slice + 1;
-			if (slice == slices - 1) topright = stack * slices;
-			int bottomleft = (stack + 1) * slices + slice;
-			int bottomright = (stack + 1) * slices + slice + 1;
-			if (slice == slices - 1) bottomright = (stack + 1) * slices;
-			_indx.push_back(topleft);
+			int bottomright = stack * slices + slice + 1;
+			int bottomleft = stack * slices + slice + 1 + 1;
+			int topright = (stack + 1) * slices + slice + 1;
+			int topleft = (stack + 1) * slices + slice + 1 + 1;
+
+			if (slice == slices - 1) bottomleft = stack * slices + 1;
+			if (slice == slices - 1) topleft = (stack + 1) * slices + 1;
+
 			_indx.push_back(bottomright);
 			_indx.push_back(bottomleft);
+			_indx.push_back(topright);
 
 			_indx.push_back(topright);
-			_indx.push_back(bottomright);
 			_indx.push_back(bottomleft);
+			_indx.push_back(topleft);
 		}
+	}
+
+	int lastIndex = _vertx.size() - 1;
+	for (int slice = 0; slice < slices; slice++)
+	{
+		int top = lastIndex;
+		int bottomright = lastIndex - slice - 1;
+		int bottomleft = lastIndex - slice - 2;
+		if (slice == slices - 1) bottomleft = lastIndex - 1;
+		_indx.push_back(top);
+		_indx.push_back(bottomleft);
+		_indx.push_back(bottomright);
 	}
 
 	//for (int i = 0; i < _vertx.size(); i++)
@@ -181,7 +208,7 @@ void Sphere::Init(ID3D11Device* device)
 
 	D3D11_RASTERIZER_DESC rastDesc;
 	rastDesc.AntialiasedLineEnable = true;
-	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 	rastDesc.DepthBias = 0;
 	rastDesc.DepthBiasClamp = 1.0;
 	rastDesc.DepthClipEnable = true;
