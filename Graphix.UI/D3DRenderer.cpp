@@ -90,19 +90,21 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 	_device->CreateRasterizerState(&rastDesc, &rastState);
 	_deviceContext->RSSetState(rastState);
 
-	_square = new Square();
-	_square->Init(_device);
+	//_square = new Square();
+	//_square->Init(_device);
+	_sphere = new Sphere();
+	_sphere->Init(_device);
 	int stop = 0;
 
 }
 
-void D3DRenderer::Render()
+void D3DRenderer::Render(Keyboard* keyboard)
 {
 	static int red = 0;
 	red = rand() % 255;
 	FLOAT color[4] = { 0, 0, 0, 255 };
 	_deviceContext->ClearDepthStencilView(_dsv, D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0, 0);
 	_deviceContext->ClearRenderTargetView(_rtv, color);
-	_square->Render(_deviceContext);
+	_sphere->Render(_deviceContext, keyboard);
 	_swapChain->Present(0, 0);
 }

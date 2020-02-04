@@ -1,10 +1,10 @@
-#include "Square.h"
+#include "Sphere.h"
 
-Square::Square()
+Sphere::Sphere()
 {
 }
 
-void Square::Init(ID3D11Device* device)
+void Sphere::Init(ID3D11Device* device)
 {
 	_fr = new FileReader();
 	std::vector<unsigned char> psBytes;
@@ -23,39 +23,102 @@ void Square::Init(ID3D11Device* device)
 	_pitch = 0;
 	_yaw = 0;
 
-	// Vertices
-	float x = 1;
-	float y = 1.0;
-	float z = 1.5;
+	//// Vertices
+	//float x = 1;
+	//float y = 1.0;
+	//float z = 1.5;
 
-	Vertex v1;
-	v1.Position = DirectX::XMFLOAT4(-x - 0.2, y, z, 1);
-	v1.Color = DirectX::XMFLOAT4(1, 0, 0, 1);
+	//Vertex v1;
+	//v1.Position = DirectX::XMFLOAT4(-x - 0.2, y, z, 1);
+	//v1.Color = DirectX::XMFLOAT4(1, 0, 0, 1);
 
-	Vertex v2;
-	v2.Position = DirectX::XMFLOAT4(x - 0.2, y, z, 1);
-	v2.Color = DirectX::XMFLOAT4(0, 1, 0, 1);
+	//Vertex v2;
+	//v2.Position = DirectX::XMFLOAT4(x - 0.2, y, z, 1);
+	//v2.Color = DirectX::XMFLOAT4(0, 1, 0, 1);
 
-	Vertex v3;
-	v3.Position = DirectX::XMFLOAT4(x - 0.2, -y, z, 1);
-	v3.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
+	//Vertex v3;
+	//v3.Position = DirectX::XMFLOAT4(x - 0.2, -y, z, 1);
+	//v3.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
-	Vertex v4;
-	v4.Position = DirectX::XMFLOAT4(-x - 0.2, -y, z, 1);
-	v4.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
+	//Vertex v4;
+	//v4.Position = DirectX::XMFLOAT4(-x - 0.2, -y, z, 1);
+	//v4.Color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
-	_vertx.push_back(v1);
-	_vertx.push_back(v2);
-	_vertx.push_back(v3);
-	_vertx.push_back(v4);
+	//_vertx.push_back(v1);
+	//_vertx.push_back(v2);
+	//_vertx.push_back(v3);
+	//_vertx.push_back(v4);
 
-	_indx.push_back(0);
-	_indx.push_back(2);
-	_indx.push_back(3);
+	//_indx.push_back(0);
+	//_indx.push_back(2);
+	//_indx.push_back(3);
 
-	_indx.push_back(0);
-	_indx.push_back(1);
-	_indx.push_back(2);
+	//_indx.push_back(0);
+	//_indx.push_back(1);
+	//_indx.push_back(2);
+
+	int stacks = 10;
+	int slices = 10;
+	double radius = 5.0;
+
+	// Build vertex list
+	Vertex top;
+	Vertex bottom;
+
+	top.Position = DirectX::XMFLOAT4(0, radius, 0, 1);
+	top.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	//_vertx.push_back(top);
+
+	for (int stack = 0; stack < stacks; stack++)
+	{
+		for (int slice = 0; slice < slices; slice++)
+		{
+			double red = (double)stack / (double)stacks;
+			double green = (double)slice / (double)slices;
+			Vertex point;
+			double theta = radians(180.0 - ((double)stack / (double)stacks) * 180.0);
+			double phi = radians(((double)slice / (double)slices) * 360.0);
+			double x = radius * sin(theta) * cos(phi);
+			double y = radius * cos(theta);
+			double z = radius * sin(theta) * sin(phi);
+			point.Position = DirectX::XMFLOAT4(x, y, z, 1);
+			if (stack == 0) point.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+			else point.Color = DirectX::XMFLOAT4(red, green, 0, 1);
+			_vertx.push_back(point);
+		}
+	}
+
+	bottom.Position = DirectX::XMFLOAT4(0, -radius, 0, 1);
+	bottom.Color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	//_vertx.push_back(bottom);
+
+	// Build index list
+	for (int stack = 0; stack < stacks; stack++)
+	{
+		for (int slice = 0; slice < slices; slice++)
+		{
+			int topleft = stack * slices + slice;
+			int topright = stack * slices + slice + 1;
+			if (slice == slices - 1) topright = stack * slices;
+			int bottomleft = (stack + 1) * slices + slice;
+			int bottomright = (stack + 1) * slices + slice + 1;
+			if (slice == slices - 1) bottomright = (stack + 1) * slices;
+			_indx.push_back(topleft);
+			_indx.push_back(bottomright);
+			_indx.push_back(bottomleft);
+
+			_indx.push_back(topright);
+			_indx.push_back(bottomright);
+			_indx.push_back(bottomleft);
+		}
+	}
+
+	//for (int i = 0; i < _vertx.size(); i++)
+	//{
+	//	_indx.push_back(i);
+	//}
+	//_indx.push_back(0);
+	//_indx.push_back(1);
 
 	D3D11_BUFFER_DESC descVertex;
 	descVertex.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
@@ -146,7 +209,7 @@ void Square::Init(ID3D11Device* device)
 
 }
 
-void Square::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
+void Sphere::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 {
 	if (keyboard->IsKeyDown('W')) {
 		_z += 0.01;
@@ -171,8 +234,23 @@ void Square::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 		_y = 0;
 		_z = 0;
 	}
-	if (keyboard->IsKeyDown('I')) {
+	if (keyboard->IsKeyDown('O')) {
 		_yaw += 0.001;
+	}
+	if (keyboard->IsKeyDown('L')) {
+		_yaw -= 0.001;
+	}
+	if (keyboard->IsKeyDown('I')) {
+		_pitch += 0.001;
+	}
+	if (keyboard->IsKeyDown('K')) {
+		_pitch -= 0.001;
+	}
+	if (keyboard->IsKeyDown('U')) {
+		_roll += 0.001;
+	}
+	if (keyboard->IsKeyDown('J')) {
+		_roll -= 0.001;
 	}
 	auto matrix = DirectX::XMMatrixTranslation(_x, _y, _z);
 	auto rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(_pitch, _yaw, _roll);
@@ -208,3 +286,4 @@ void Square::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 
 	//context->Unmap(_vertexBuffer, 0);
 }
+

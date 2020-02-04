@@ -1,13 +1,14 @@
 #pragma once
+#pragma once
 #include <d3d11.h>
 #include "FileReader.h"
 #include "Structs.h"
 #include "GraphicsUtil.h"
 #include "Keyboard.h"
-class Square
+class Sphere
 {
 public:
-	Square();
+	Sphere();
 	void Init(ID3D11Device* device);
 	void Render(ID3D11DeviceContext* context, Keyboard* keyboard);
 private:

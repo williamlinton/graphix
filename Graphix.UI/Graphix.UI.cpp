@@ -18,6 +18,7 @@ HWND _handle;
 int _width;
 int _height;
 D3DRenderer* g_d3d;
+Keyboard* g_keyboard;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -40,6 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _width = 800;
     _height = 600;
     g_d3d = new D3DRenderer();
+    g_keyboard = new Keyboard();
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -56,6 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
     g_d3d->Init(_handle, _width, _height);
+    g_keyboard->Init();
 
     double dt = 0;
     int index = 0;
@@ -73,7 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
         dt = timer.GetElapsedMilliseconds();
-        g_d3d->Render();
+        g_d3d->Render(g_keyboard);
         // update metrics
         ++frames;
         ++index;
@@ -205,6 +208,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
+        break;
+    case WM_KEYDOWN:
+		{
+			g_keyboard->SetKey((char)wParam, true);
+		}
+        break;
+    case WM_KEYUP:
+		{
+			g_keyboard->SetKey((char)wParam, false);
+		}
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

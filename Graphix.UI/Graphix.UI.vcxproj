@@ -157,7 +157,9 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GraphicsUtil.h" />
     <ClInclude Include="Graphix.UI.h" />
+    <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="targetver.h" />
@@ -170,6 +172,8 @@
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GraphicsUtil.cpp" />
     <ClCompile Include="Graphix.UI.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
