@@ -19,6 +19,7 @@ int _width;
 int _height;
 D3DRenderer* g_d3d;
 Keyboard* g_keyboard;
+BitmapFileReader* g_bitmapReader;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -42,6 +43,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _height = 600;
     g_d3d = new D3DRenderer();
     g_keyboard = new Keyboard();
+    g_bitmapReader = new BitmapFileReader();
+    g_bitmapReader->ReadFile("C:\\Users\\wlinton\\Documents\\Sandbox\\Graphix\\sample.bmp");
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
