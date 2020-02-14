@@ -14,3 +14,10 @@ struct CBPerEntity
 	DirectX::XMFLOAT4X4 WorldToCamera;
 	DirectX::XMFLOAT4X4 CameraToProjection;
 };
+
+struct Bitmap
+{
+	int Width;
+	int Height;
+	std::vector<DirectX::XMFLOAT4> Pixels;
+};

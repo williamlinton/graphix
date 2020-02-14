@@ -2,9 +2,10 @@
 #include <string>
 #include <vector>
 #include <DirectXMath.h>
+#include "Structs.h"
 class BitmapFileReader
 {
 public:
-	std::vector<DirectX::XMFLOAT4> ReadFile(std::string path);
+	Bitmap ReadFile(std::string path);
 };
 

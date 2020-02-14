@@ -7,6 +7,7 @@
 #include "Square.h"
 #include "Keyboard.h"
 #include "Sphere.h"
+#include "Terrain.h"
 
 class D3DRenderer
 {
@@ -25,6 +26,7 @@ private:
 	//Triangle* _triangle;
 	Square* _square;
 	Sphere* _sphere;
+	Terrain* _terrain;
 	ID3D11DepthStencilView* _dsv;
 };
 

@@ -1,6 +1,6 @@
 #include "BitmapFileReader.h"
 
-std::vector<DirectX::XMFLOAT4> BitmapFileReader::ReadFile(std::string path)
+Bitmap BitmapFileReader::ReadFile(std::string path)
 {
 	int OFFSET_BMP_HEADER = 0;
 	int OFFSET_PIXEL_DATA_OFFSET = 10;
@@ -12,6 +12,7 @@ std::vector<DirectX::XMFLOAT4> BitmapFileReader::ReadFile(std::string path)
 	int OFFSET_DIB_HEADER_IMAGESIZE = OFFSET_DIB_HEADER + 36;
 
 	std::vector<DirectX::XMFLOAT4> pixels;
+	Bitmap bitmap;
 
 	FILE* handle;
 	errno_t err = fopen_s(&handle, path.c_str(), "rb");
@@ -26,7 +27,7 @@ std::vector<DirectX::XMFLOAT4> BitmapFileReader::ReadFile(std::string path)
 	if (headerType[0] != 'B' || headerType[1] != 'M')
 	{
 		// Unsupported bitmap type
-		return pixels;
+		return bitmap;
 	}
 
 	// Find out where the pixel data is
@@ -68,13 +69,13 @@ std::vector<DirectX::XMFLOAT4> BitmapFileReader::ReadFile(std::string path)
 	if (bpp % 3 > 0)
 	{
 		// Unsupported pixel type
-		return pixels;
+		return bitmap;
 	}
 
 	if (compression != 0)
 	{
 		// We don't support compression -- must be BI_RGB
-		return pixels;
+		return bitmap;
 	}
 
 	// Calculate various dimensions
@@ -103,10 +104,14 @@ std::vector<DirectX::XMFLOAT4> BitmapFileReader::ReadFile(std::string path)
 			int b = pixelDataRaw[w * pixelBytes + h * rowsizeBytes];
 			int g = pixelDataRaw[w * pixelBytes + h * rowsizeBytes + 1];
 			int r = pixelDataRaw[w * pixelBytes + h * rowsizeBytes + 2];
-			DirectX::XMFLOAT4* pixel = new DirectX::XMFLOAT4(r, g, b, 255);
-			pixels[w + width * h ] = *pixel;
+			DirectX::XMFLOAT4 pixel = DirectX::XMFLOAT4(r, g, b, 255);
+			pixels[w + width * h ] = pixel;
 		}
 	}
 
-	return pixels;
+	bitmap.Height = height;
+	bitmap.Width = width;
+	bitmap.Pixels = pixels;
+
+	return bitmap;
 }

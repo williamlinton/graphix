@@ -1,17 +1,19 @@
 #pragma once
 #include <d3d11.h>
 #include "FileReader.h"
+#include "BitmapFileReader.h"
 #include "Structs.h"
 #include "GraphicsUtil.h"
 #include "Keyboard.h"
-class Sphere
+class Terrain
 {
 public:
-	Sphere();
+	Terrain();
 	void Init(ID3D11Device* device);
 	void Render(ID3D11DeviceContext* context, Keyboard* keyboard);
 private:
 	FileReader* _fr;
+	BitmapFileReader* _bfr;
 	ID3D11PixelShader* _pixelShader;
 	ID3D11VertexShader* _vertexShader;
 	ID3D11Buffer* _indexBuffer;
@@ -33,5 +35,6 @@ private:
 	float _roll;
 	float _pitch;
 	float _yaw;
+
 };
 
