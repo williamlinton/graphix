@@ -213,15 +213,16 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 		y -= 0.01;
 	}
 	if (keyboard->IsKeyDown('R')) {
-		x = 0;
-		y = 0;
-		z = 0;
+		_camera->SetPosition(0, 0, 0);
+		_yaw = 0;
+		_pitch = 0;
+		_roll = 0;
 	}
 	if (keyboard->IsKeyDown('O')) {
-		_yaw += 0.1;
+		_yaw -= 0.1;
 	}
 	if (keyboard->IsKeyDown('L')) {
-		_yaw -= 0.1;
+		_yaw += 0.1;
 	}
 	if (keyboard->IsKeyDown('I')) {
 		_pitch += 0.1;
