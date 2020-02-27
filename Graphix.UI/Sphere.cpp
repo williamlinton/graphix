@@ -57,8 +57,8 @@ void Sphere::Init(ID3D11Device* device)
 	//_indx.push_back(1);
 	//_indx.push_back(2);
 
-	int stacks = 10;
-	int slices = 10;
+	int stacks = 200;
+	int slices = 200;
 	double radius = 5.0;
 
 	// Build vertex list
@@ -208,11 +208,11 @@ void Sphere::Init(ID3D11Device* device)
 
 	D3D11_RASTERIZER_DESC rastDesc;
 	rastDesc.AntialiasedLineEnable = true;
-	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
 	rastDesc.DepthBias = 0;
 	rastDesc.DepthBiasClamp = 1.0;
 	rastDesc.DepthClipEnable = true;
-	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
 	rastDesc.FrontCounterClockwise = false;
 	rastDesc.MultisampleEnable = false;
 	rastDesc.ScissorEnable = false;

@@ -182,6 +182,8 @@ void Terrain::Init(ID3D11Device* device)
 	auto projMatrix = DirectX::XMMatrixPerspectiveFovLH(radians(45), 800.0 / 600.0, 1, 1000);
 	DirectX::XMStoreFloat4x4(&_cameraToProjection, projMatrix);
 	
+	_camera = new Camera();
+	_camera->SetPosition(_x, _y, _z);
 
 	int stop = 9000;
 
@@ -189,51 +191,50 @@ void Terrain::Init(ID3D11Device* device)
 
 void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 {
+	float x, y, z;
+	x = y = z = 0;
+	float pitch, yaw, roll;
 	if (keyboard->IsKeyDown('W')) {
-		_z += 0.01;
+		z += 0.01;
 	}
 	if (keyboard->IsKeyDown('S')) {
-		_z -= 0.01;
+		z -= 0.01;
 	}
 	if (keyboard->IsKeyDown('A')) {
-		_x -= 0.01;
+		x -= 0.01;
 	}
 	if (keyboard->IsKeyDown('D')) {
-		_x += 0.01;
+		x += 0.01;
 	}
 	if (keyboard->IsKeyDown('T')) {
-		_y += 0.01;
+		y += 0.01;
 	}
 	if (keyboard->IsKeyDown('G')) {
-		_y -= 0.01;
+		y -= 0.01;
 	}
 	if (keyboard->IsKeyDown('R')) {
-		_x = 0;
-		_y = 0;
-		_z = 0;
+		x = 0;
+		y = 0;
+		z = 0;
 	}
 	if (keyboard->IsKeyDown('O')) {
-		_yaw += 0.001;
+		_yaw += 0.1;
 	}
 	if (keyboard->IsKeyDown('L')) {
-		_yaw -= 0.001;
+		_yaw -= 0.1;
 	}
 	if (keyboard->IsKeyDown('I')) {
-		_pitch += 0.001;
+		_pitch += 0.1;
 	}
 	if (keyboard->IsKeyDown('K')) {
-		_pitch -= 0.001;
+		_pitch -= 0.1;
 	}
 	if (keyboard->IsKeyDown('U')) {
-		_roll += 0.001;
+		_roll += 0.1;
 	}
 	if (keyboard->IsKeyDown('J')) {
-		_roll -= 0.001;
+		_roll -= 0.1;
 	}
-	auto matrix = DirectX::XMMatrixTranslation(_x, _y, _z);
-	auto rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(_pitch, _yaw, _roll);
-	auto finalMatrix = rotationMatrix * matrix;
-	DirectX::XMStoreFloat4x4(&_modelToWorld, finalMatrix);
 
 	context->IASetInputLayout(_inputLayout);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -251,7 +252,22 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 
 	context->Map(_constantBuffer, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 	CBPerEntity* cbperentity = (CBPerEntity*)subresource.pData;
+
+	if (x != 0 || y != 0 || z != 0)
+	{
+		_camera->Travel(x, y, z);
+	}
+	_camera->SetRotation(_pitch, _yaw, _roll);
+	_camera->Render();
+	DirectX::XMMATRIX viewMatrix;
+	_camera->GetViewMatrix(&viewMatrix);
+	DirectX::XMStoreFloat4x4(&_worldToCamera, viewMatrix);
+
 	cbperentity->ModelToWorld = _modelToWorld;
+	//auto matrix = DirectX::XMMatrixTranslation(_x, _y, _z);
+	//auto rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(_pitch, _yaw, _roll);
+	//auto finalMatrix = matrix * rotationMatrix ;
+	//DirectX::XMStoreFloat4x4(&_worldToCamera, finalMatrix);
 	cbperentity->WorldToCamera = _worldToCamera;
 	cbperentity->CameraToProjection = _cameraToProjection;
 	context->Unmap(_constantBuffer, 0);

@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BitmapFileReader.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="D3DRenderer.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="framework.h" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitmapFileReader.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3DRenderer.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="GameTimer.cpp" />

@@ -43,9 +43,6 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 
 	//D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 
-	HRESULT rtvResult = _device->CreateRenderTargetView(backBuffer, nullptr, &_rtv);
-	_deviceContext->OMSetRenderTargets(1, &_rtv, 0);
-
 	D3D11_VIEWPORT viewport;
 	viewport.Height = _height;
 	viewport.MaxDepth = 1.0;
@@ -81,6 +78,9 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 	auto depthBufferResult = _device->CreateTexture2D(&texDesc, 0, &depthBuffer);
 
 	auto dsvResult = _device->CreateDepthStencilView(depthBuffer, &dsvDesc, &_dsv);
+
+	HRESULT rtvResult = _device->CreateRenderTargetView(backBuffer, nullptr, &_rtv);
+	_deviceContext->OMSetRenderTargets(1, &_rtv, _dsv);
 
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));

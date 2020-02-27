@@ -5,6 +5,7 @@
 #include "Structs.h"
 #include "GraphicsUtil.h"
 #include "Keyboard.h"
+#include "Camera.h"
 class Terrain
 {
 public:
@@ -36,5 +37,6 @@ private:
 	float _pitch;
 	float _yaw;
 
+	Camera* _camera;
 };
 
