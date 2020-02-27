@@ -33,11 +33,11 @@ void Camera::Travel(float x, float y, float z)
 	_positionZ += travelTransformed.z;
 }
 
-void Camera::SetRotation(float x, float y, float z)
+void Camera::SetRotation(float pitch, float yaw, float roll)
 {
-	_rotationX = x;
-	_rotationY = y;
-	_rotationZ = z;
+	_rotationX = pitch;
+	_rotationY = yaw;
+	_rotationZ = roll;
 }
 
 void Camera::Render()
