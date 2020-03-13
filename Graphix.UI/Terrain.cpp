@@ -206,10 +206,10 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 	if (keyboard->IsKeyDown('D')) {
 		x += 0.01;
 	}
-	if (keyboard->IsKeyDown('T')) {
+	if (keyboard->IsKeyDown('Q')) {
 		y += 0.01;
 	}
-	if (keyboard->IsKeyDown('G')) {
+	if (keyboard->IsKeyDown('E')) {
 		y -= 0.01;
 	}
 	if (keyboard->IsKeyDown('R')) {
@@ -218,7 +218,7 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 		_pitch = 0;
 		_roll = 0;
 	}
-	if (keyboard->IsKeyDown('O')) {
+	if (keyboard->IsKeyDown('J')) {
 		_yaw -= 0.1;
 	}
 	if (keyboard->IsKeyDown('L')) {
@@ -231,10 +231,10 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 		_pitch -= 0.1;
 	}
 	if (keyboard->IsKeyDown('U')) {
-		_roll += 0.1;
-	}
-	if (keyboard->IsKeyDown('J')) {
 		_roll -= 0.1;
+	}
+	if (keyboard->IsKeyDown('O')) {
+		_roll += 0.1;
 	}
 
 	context->IASetInputLayout(_inputLayout);
