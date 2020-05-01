@@ -7,6 +7,10 @@ FileReader::FileReader()
 
 std::vector<unsigned char> FileReader::ReadFile(std::string path)
 {
+	std::vector<wchar_t> cd;
+	cd.resize(256);
+	GetCurrentDirectory(256, &cd[0]);
+
 	std::vector<unsigned char> bytes;
 	FILE* handle;
 	errno_t err = fopen_s(&handle, path.c_str(), "rb");

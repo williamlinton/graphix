@@ -6,6 +6,7 @@
 #include "GraphicsUtil.h"
 #include "Keyboard.h"
 #include "Camera.h"
+#include "Settings.h"
 class Terrain
 {
 public:
@@ -24,6 +25,7 @@ private:
 	ID3D11RasterizerState* _rasterizerState;
 	std::vector<Vertex> _vertx;
 	std::vector<unsigned int> _indx;
+	std::vector<DirectX::XMFLOAT4> _norml;
 
 	DirectX::XMFLOAT4X4 _modelToWorld;
 	DirectX::XMFLOAT4X4 _worldToCamera;

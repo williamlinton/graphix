@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include "FileReader.h"
 #include "Structs.h"
+#include "Settings.h"
 class Triangle
 {
 public:

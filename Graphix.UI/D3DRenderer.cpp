@@ -1,3 +1,4 @@
+#include <iostream>
 #include "D3DRenderer.h"
 
 void D3DRenderer::Init(HWND handle, int width, int height)
@@ -7,9 +8,48 @@ void D3DRenderer::Init(HWND handle, int width, int height)
 
 	IDXGIFactory* _dxgiFactory;
 	HRESULT result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&_dxgiFactory);
-	HRESULT adapterResult = _dxgiFactory->EnumAdapters(0, &_adapter);
-	DXGI_ADAPTER_DESC desc;
-	_adapter->GetDesc(&desc);
+
+	const int maxAdaptersToTry = 4;
+	int highestDedicatedMemoryFound = -1;
+	DXGI_ADAPTER_DESC chosenDesc;
+
+	for (int i = 0; i < maxAdaptersToTry; i++)
+	{
+		IDXGIAdapter* adapter;
+		HRESULT adapterResult = _dxgiFactory->EnumAdapters(i, &adapter);
+		if (adapterResult != S_OK)
+		{
+			break;
+		}
+		DXGI_ADAPTER_DESC desc;
+		adapter->GetDesc(&desc);
+		if (highestDedicatedMemoryFound == -1 ||
+			desc.DedicatedVideoMemory > highestDedicatedMemoryFound)
+		{
+			_adapter = adapter;
+			highestDedicatedMemoryFound = desc.DedicatedVideoMemory;
+			chosenDesc = desc;
+		}
+	}
+
+	if (highestDedicatedMemoryFound == -1)
+	{
+		std::cout << "Found no graphics cards with dedicated memory. Exiting...";
+		exit(0);
+	}
+
+	std::cout << "Using graphics card: ";
+	std::cout << chosenDesc.Description;
+
+	//HRESULT adapterResult0 = _dxgiFactory->EnumAdapters(0, &_adapter0);
+	//HRESULT adapterResult1 = _dxgiFactory->EnumAdapters(1, &_adapter1);
+	//HRESULT adapterResult2 = _dxgiFactory->EnumAdapters(3, &_adapter2);
+	//DXGI_ADAPTER_DESC desc0;
+	//DXGI_ADAPTER_DESC desc1;
+	//DXGI_ADAPTER_DESC desc2;
+	//_adapter0->GetDesc(&desc0);
+	//_adapter1->GetDesc(&desc1);
+	//_adapter2->GetDesc(&desc2);
 
 	unsigned int flags = 0;
 	flags |= D3D11_CREATE_DEVICE_BGRA_SUPPORT;

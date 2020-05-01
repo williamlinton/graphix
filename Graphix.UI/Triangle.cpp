@@ -10,8 +10,8 @@ void Triangle::Init(ID3D11Device* device)
 	_fr = new FileReader();
 	std::vector<unsigned char> psBytes;
 	std::vector<unsigned char> vsBytes;
-	psBytes = _fr->ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\x64\\Debug\\PixelShader.cso");
-	vsBytes = _fr->ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\x64\\Debug\\VertexShader.cso");
+	psBytes = _fr->ReadFile(GetShaderPath("PixelShader.cso"));
+	vsBytes = _fr->ReadFile(GetShaderPath("VertexShader.cso"));
 	HRESULT result = device->CreatePixelShader(&psBytes[0], psBytes.size(), 0, &_pixelShader);
 	HRESULT result2 = device->CreateVertexShader(&vsBytes[0], vsBytes.size(), 0, &_vertexShader);
 

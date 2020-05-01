@@ -9,13 +9,13 @@ void Terrain::Init(ID3D11Device* device)
 	_fr = new FileReader();
 	std::vector<unsigned char> psBytes;
 	std::vector<unsigned char> vsBytes;
-	psBytes = _fr->ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\x64\\Debug\\PixelShader.cso");
-	vsBytes = _fr->ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\x64\\Debug\\VertexShader.cso");
+	psBytes = _fr->ReadFile(GetShaderPath("PixelShader.cso"));
+	vsBytes = _fr->ReadFile(GetShaderPath("VertexShader.cso"));
 	HRESULT result = device->CreatePixelShader(&psBytes[0], psBytes.size(), 0, &_pixelShader);
 	HRESULT result2 = device->CreateVertexShader(&vsBytes[0], vsBytes.size(), 0, &_vertexShader);
 
 	_bfr = new BitmapFileReader();
-	Bitmap bitmap = _bfr->ReadFile("C:\\Users\\wlinton\\Documents\\Sandbox\\Graphix\\terrain.bmp");
+	Bitmap bitmap = _bfr->ReadFile(GetResourcePath("terrain.bmp"));
 
 	// Matrix
 	_x = 0;
@@ -27,12 +27,15 @@ void Terrain::Init(ID3D11Device* device)
 	_yaw = 0;
 
 #if 1
-	int nodeCountX = 256;
-	int nodeCountZ = 256;
+	int nodeCountX = 128;
+	int nodeCountZ = 128;
 
 	double width = 100.0;
 	double depth = 100.0;
 	double height = 10.0;
+
+	std::vector<DirectX::XMFLOAT4> normalSumByVertex;
+	std::vector<int> faceCountByVertex;
 
 	for (int d = 0; d < nodeCountZ; d++)
 	{
@@ -53,6 +56,9 @@ void Terrain::Init(ID3D11Device* device)
 		}
 	}
 
+	normalSumByVertex.resize(_vertx.size());
+	faceCountByVertex.resize(_vertx.size());
+
 	for (int d = 0; d < nodeCountZ - 1; d++)
 	{
 		for (int w = 0; w < nodeCountX - 1; w++)
@@ -66,6 +72,68 @@ void Terrain::Init(ID3D11Device* device)
 			_indx.push_back(w + (d + 1) * nodeCountX);
 		}
 	}
+
+	std::vector<DirectX::XMFLOAT4> normals;
+	int count = _indx.size();
+	int n = 0;
+	while (n < count - 2)
+	{
+		double v1x = _vertx[_indx[n]].Position.x;
+		double v1y = _vertx[_indx[n]].Position.y;
+		double v1z = _vertx[_indx[n]].Position.z;
+
+		double v2x = _vertx[_indx[n + 1]].Position.x;
+		double v2y = _vertx[_indx[n + 1]].Position.y;
+		double v2z = _vertx[_indx[n + 1]].Position.z;
+
+		double v3x = _vertx[_indx[n + 2]].Position.x;
+		double v3y = _vertx[_indx[n + 2]].Position.y;
+		double v3z = _vertx[_indx[n + 2]].Position.z;
+
+		double vec1x = v1x - v3x;
+		double vec1y = v1y - v3y;
+		double vec1z = v1z - v3z;
+
+		double vec2x = v3x - v2x;
+		double vec2y = v3y - v2y;
+		double vec2z = v3z - v2z;
+
+		double normalx = (vec1y * vec2z) - (vec1z * vec2y);
+		double normaly = (vec1z * vec2x) - (vec1x * vec2z);
+		double normalz = (vec1x * vec2y) - (vec1y * vec2x);
+
+		normalSumByVertex[_indx[n]].x += normalx;
+		normalSumByVertex[_indx[n]].y += normaly;
+		normalSumByVertex[_indx[n]].z += normalz;
+		faceCountByVertex[_indx[n]] += 1;
+
+		normalSumByVertex[_indx[n + 1]].x += normalx;
+		normalSumByVertex[_indx[n + 1]].y += normaly;
+		normalSumByVertex[_indx[n + 1]].z += normalz;
+		faceCountByVertex[_indx[n + 1]] += 1;
+
+		normalSumByVertex[_indx[n + 2]].x += normalx;
+		normalSumByVertex[_indx[n + 2]].y += normaly;
+		normalSumByVertex[_indx[n + 2]].z += normalz;
+		faceCountByVertex[_indx[n + 2]] += 1;
+
+		normals.push_back(DirectX::XMFLOAT4(normalx, normaly, normalz, 1));
+
+		n += 3;
+	}
+
+	normals.clear();
+
+	for (int i = 0; i < _vertx.size(); i++)
+	{
+		_vertx[i].Normal = DirectX::XMFLOAT4(
+			normalSumByVertex[i].x / faceCountByVertex[i],
+			normalSumByVertex[i].y / faceCountByVertex[i],
+			normalSumByVertex[i].z / faceCountByVertex[i],
+			1
+		);
+	}
+
 
 #else
 	for (int h = 0; h < bitmap.Height; h++)

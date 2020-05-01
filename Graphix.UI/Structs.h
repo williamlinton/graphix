@@ -6,6 +6,7 @@ struct Vertex
 {
 	DirectX::XMFLOAT4 Position;
 	DirectX::XMFLOAT4 Color;
+	DirectX::XMFLOAT4 Normal;
 };
 
 struct CBPerEntity

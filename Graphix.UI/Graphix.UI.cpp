@@ -7,6 +7,7 @@
 #include "D3DRenderer.h"
 #include "GameTimer.h"
 #include "FileReader.h"
+#include "FPSTimer.h"
 
 #define MAX_LOADSTRING 100
 
@@ -36,7 +37,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     FileReader fr;
-    fr.ReadFile("C:\\Users\\wlinton\\Source\\Repos\\Graphix\\Debug\\PixelShader.cso");
+    fr.ReadFile(GetShaderPath("PixelShader.cso"));
 
     // TODO: Place code here.
     _width = 800;
@@ -79,7 +80,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
         dt = timer.GetElapsedMilliseconds();
+
+		GameTimer timer2;
+		timer2.Start();
         g_d3d->Render(g_keyboard);
+        double work = timer2.GetElapsedMilliseconds();
         // update metrics
         ++frames;
         ++index;
@@ -93,6 +98,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             metric += std::to_wstring(frames);
             metric += L"    Index: ";
             metric += std::to_wstring(index);
+            metric += L"    FPS: ";
+            metric += std::to_wstring(1000 / dt);
+            metric += L"    Work: ";
+            metric += std::to_wstring(work);
             SetWindowText(_handle, metric.c_str());
             metricTime = 0;
         }

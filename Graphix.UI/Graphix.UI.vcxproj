@@ -161,6 +161,7 @@
     <ClInclude Include="Graphix.UI.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Structs.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="GraphicsUtil.cpp" />
     <ClCompile Include="Graphix.UI.cpp" />
     <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="Terrain.cpp" />

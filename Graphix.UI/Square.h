@@ -4,6 +4,7 @@
 #include "Structs.h"
 #include "GraphicsUtil.h"
 #include "Keyboard.h"
+#include "Settings.h"
 class Square
 {
 public:
