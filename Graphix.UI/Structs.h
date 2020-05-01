@@ -16,6 +16,16 @@ struct CBPerEntity
 	DirectX::XMFLOAT4X4 CameraToProjection;
 };
 
+struct CBLighting
+{
+	DirectX::XMFLOAT4 DiffuseLightColor;
+	DirectX::XMFLOAT4 DiffuseLightDirection;
+	float DiffuseLightIntensity;
+	float Nothing1;
+	float Nothing2;
+	float Nothing3;
+};
+
 struct Bitmap
 {
 	int Width;

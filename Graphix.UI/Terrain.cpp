@@ -9,8 +9,8 @@ void Terrain::Init(ID3D11Device* device)
 	_fr = new FileReader();
 	std::vector<unsigned char> psBytes;
 	std::vector<unsigned char> vsBytes;
-	psBytes = _fr->ReadFile(GetShaderPath("PixelShader.cso"));
-	vsBytes = _fr->ReadFile(GetShaderPath("VertexShader.cso"));
+	psBytes = _fr->ReadFile(GetShaderPath("TerrainPixelShader.cso"));
+	vsBytes = _fr->ReadFile(GetShaderPath("TerrainVertexShader.cso"));
 	HRESULT result = device->CreatePixelShader(&psBytes[0], psBytes.size(), 0, &_pixelShader);
 	HRESULT result2 = device->CreateVertexShader(&vsBytes[0], vsBytes.size(), 0, &_vertexShader);
 
@@ -50,7 +50,8 @@ void Terrain::Init(ID3D11Device* device)
 			double z = (double)d / (double)nodeCountZ * depth ;
 			double y = (double)heightColor.x / 256.0 * height - height / 2.0;
 			Vertex vertex;
-			vertex.Color = DirectX::XMFLOAT4(255, 255, 255, 255);
+			//vertex.Color = DirectX::XMFLOAT4(255 * 0.05, 255 * 0.05, 255 * 0.05, 255 * 0.05);
+			vertex.Color = DirectX::XMFLOAT4(0.05, 0.05, 0.05, 0.05);
 			vertex.Position = DirectX::XMFLOAT4(x, y, z, 1);
 			_vertx.push_back(vertex);
 		}
@@ -190,6 +191,14 @@ void Terrain::Init(ID3D11Device* device)
 	descConstant.StructureByteStride = 0;
 	descConstant.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
 
+	D3D11_BUFFER_DESC descConstantLighting;
+	descConstantLighting.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+	descConstantLighting.ByteWidth = sizeof(CBLighting);
+	descConstantLighting.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
+	descConstantLighting.MiscFlags = 0;
+	descConstantLighting.StructureByteStride = 0;
+	descConstantLighting.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+
 	
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.SysMemPitch = 0;
@@ -204,9 +213,10 @@ void Terrain::Init(ID3D11Device* device)
 	result = device->CreateBuffer(&descIndex, &indexData, &_indexBuffer);
 
 	result = device->CreateBuffer(&descConstant, 0, &_constantBuffer);
+	result = device->CreateBuffer(&descConstantLighting, 0, &_lightingConstantBuffer);
 
 
-	D3D11_INPUT_ELEMENT_DESC inputLayout[2];
+	D3D11_INPUT_ELEMENT_DESC inputLayout[3];
 	inputLayout[0].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputLayout[0].InputSlot = 0;
@@ -223,7 +233,15 @@ void Terrain::Init(ID3D11Device* device)
 	inputLayout[1].SemanticIndex = 0;
 	inputLayout[1].SemanticName = "COLOR";
 
-	result = device->CreateInputLayout(inputLayout, 2, &vsBytes[0], vsBytes.size(), &_inputLayout);
+	inputLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayout[2].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputLayout[2].InputSlot = 0;
+	inputLayout[2].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayout[2].InstanceDataStepRate = 0;
+	inputLayout[2].SemanticIndex = 0;
+	inputLayout[2].SemanticName = "NORMAL";
+
+	result = device->CreateInputLayout(inputLayout, 3, &vsBytes[0], vsBytes.size(), &_inputLayout);
 
 	D3D11_RASTERIZER_DESC rastDesc;
 	rastDesc.AntialiasedLineEnable = true;
@@ -231,7 +249,7 @@ void Terrain::Init(ID3D11Device* device)
 	rastDesc.DepthBias = 0;
 	rastDesc.DepthBiasClamp = 1.0;
 	rastDesc.DepthClipEnable = true;
-	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 	rastDesc.FrontCounterClockwise = false;
 	rastDesc.MultisampleEnable = false;
 	rastDesc.ScissorEnable = false;
@@ -319,9 +337,9 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 
 	D3D11_MAPPED_SUBRESOURCE subresource;
 
+	// Store projection matrices
 	context->Map(_constantBuffer, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 	CBPerEntity* cbperentity = (CBPerEntity*)subresource.pData;
-
 	if (x != 0 || y != 0 || z != 0)
 	{
 		_camera->Travel(x, y, z);
@@ -331,17 +349,22 @@ void Terrain::Render(ID3D11DeviceContext* context, Keyboard* keyboard)
 	DirectX::XMMATRIX viewMatrix;
 	_camera->GetViewMatrix(&viewMatrix);
 	DirectX::XMStoreFloat4x4(&_worldToCamera, viewMatrix);
-
 	cbperentity->ModelToWorld = _modelToWorld;
-	//auto matrix = DirectX::XMMatrixTranslation(_x, _y, _z);
-	//auto rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(_pitch, _yaw, _roll);
-	//auto finalMatrix = matrix * rotationMatrix ;
-	//DirectX::XMStoreFloat4x4(&_worldToCamera, finalMatrix);
 	cbperentity->WorldToCamera = _worldToCamera;
 	cbperentity->CameraToProjection = _cameraToProjection;
 	context->Unmap(_constantBuffer, 0);
 
+	// Store lighting constants
+	D3D11_MAPPED_SUBRESOURCE subresourceLighting;
+	context->Map(_lightingConstantBuffer, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &subresourceLighting);
+	CBLighting* cbdiffuseLight = (CBLighting*)subresourceLighting.pData;
+	cbdiffuseLight->DiffuseLightColor = DirectX::XMFLOAT4(0.5, 0.5, 0.4, 1);
+	cbdiffuseLight->DiffuseLightDirection = DirectX::XMFLOAT4(0.7, 0.3, 0, 1);
+	cbdiffuseLight->DiffuseLightIntensity = 0.8;
+	context->Unmap(_lightingConstantBuffer, 1);
+
 	context->VSSetConstantBuffers(0, 1, &_constantBuffer);
+	context->PSSetConstantBuffers(1, 1, &_lightingConstantBuffer);
 	context->DrawIndexed(_indx.size(), 0, 0);
 
 	//D3D11_MAPPED_SUBRESOURCE vertexData;

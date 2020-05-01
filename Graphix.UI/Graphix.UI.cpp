@@ -7,7 +7,6 @@
 #include "D3DRenderer.h"
 #include "GameTimer.h"
 #include "FileReader.h"
-#include "FPSTimer.h"
 
 #define MAX_LOADSTRING 100
 
@@ -104,6 +103,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             metric += std::to_wstring(work);
             SetWindowText(_handle, metric.c_str());
             metricTime = 0;
+        }
+
+        if (dt < 15)
+        {
+            Sleep(15 - dt);
         }
     }
 
